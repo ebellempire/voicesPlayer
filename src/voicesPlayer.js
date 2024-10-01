@@ -7,7 +7,6 @@ License: GPL
 class VoicesPlayer extends HTMLElement {
 	constructor(){
 		super();
-		
 		// options
 		this.options = {
 			noTitle: document.title,
@@ -60,38 +59,28 @@ class VoicesPlayer extends HTMLElement {
 	}
 	connectedCallback(){
 		this.styleSheet();
-		this.iconSprites();
 		this.getAttributes();
 		this.audioElement();
 		this.addEventListener('voicesPlayerSeconds', (e)=>{
-			let seconds = e.detail;
-			this.info.percent = (seconds / this.info.duration * 100)+'%';
-			this.info.time = seconds;
-			this.track.currentTime = this.info.duration * (seconds / this.info.duration);
-			if(this.info.state !== 'playing'){
-				this.controls.ui_playpause.innerHTML = this.controls.ui_icons.pause.outerHTML;
-				this.controls.ui_playpause.ariaLabel = this.labels.pause;
-				this.track.play();
-			}
+			if( Number.isInteger(e.detail) )
+				this.skipTo(e.detail);
 		});
 	}
 	disconnectedCallback(){}
-	iconSprites(){
-		this.controls.ui_icons.play = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		this.controls.ui_icons.play.setAttribute("viewBox", "0 0 512 512");
-		this.controls.ui_icons.play.innerHTML = `<path style="fill:currentColor;" d="M81.2,508.5l420.8-252.5L81.2,3.5v505Z"/>`;
-
-		this.controls.ui_icons.pause = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		this.controls.ui_icons.pause.setAttribute("viewBox", "0 0 512 512");
-		this.controls.ui_icons.pause.innerHTML = `<path style="fill:currentColor;" d="M210.1,508.5h-114.8V3.5h114.8v505ZM416.7,508.5h-114.8V3.5h114.8v505Z"/>`;
-
-		this.controls.ui_icons.skip_forward = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		this.controls.ui_icons.skip_forward.setAttribute("viewBox", "0 0 512 512");
-		this.controls.ui_icons.skip_forward.innerHTML = `<path style="fill: none;stroke: currentColor;stroke-linecap: square;stroke-miterlimit: 10;stroke-width: 37.4px;" d="M331.2,132.3s28.6-13.9-75.2-13.9-188,83.1-188,185.5,84.2,185.5,188,185.5,188-83.1,188-185.5"/><path style="fill:currentColor;" d="M256,30.3l94,92.8-94,92.8"/>`;
-
-		this.controls.ui_icons.skip_back = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		this.controls.ui_icons.skip_back.setAttribute("viewBox", "0 0 512 512");
-		this.controls.ui_icons.skip_back.innerHTML = this.controls.ui_icons.skip_forward.innerHTML;
+	iconSvg(_iconName){
+		if(!_iconName) return null;
+		let icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		icon.setAttribute("viewBox", "0 0 512 512");
+		if(_iconName == 'play'){
+			icon.innerHTML = `<path style="fill:currentColor;" d="M81.2,508.5l420.8-252.5L81.2,3.5v505Z"/>`;
+		}
+		if(_iconName == 'pause'){
+			icon.innerHTML = `<path style="fill:currentColor;" d="M210.1,508.5h-114.8V3.5h114.8v505ZM416.7,508.5h-114.8V3.5h114.8v505Z"/>`;
+		}
+		if(_iconName == 'skip_forward' || _iconName == 'skip_back'){
+			icon.innerHTML = `<path style="fill: none;stroke: currentColor;stroke-linecap: square;stroke-miterlimit: 10;stroke-width: 37.4px;" d="M331.2,132.3s28.6-13.9-75.2-13.9-188,83.1-188,185.5,84.2,185.5,188,185.5,188-83.1,188-185.5"/><path style="fill:currentColor;" d="M256,30.3l94,92.8-94,92.8"/>`;
+		}
+		return icon.outerHTML;
 	}
 	styleSheet(){
 		const css = new CSSStyleSheet();
@@ -110,7 +99,7 @@ class VoicesPlayer extends HTMLElement {
 			--player-artwork-background: #333;
 			--player-button-size: 40px;
 			--player-button-background: transparent;
-			--player-button-background_hover: transparent;
+			--player-button-background-hover: transparent;
 			--player-button-text: #f2f2f2;
 			--player-button-text-hover: #a2a2a2;
 			--player-button-border-radius: 0;
@@ -172,7 +161,7 @@ class VoicesPlayer extends HTMLElement {
 		}
 		button:hover{
 			color: var(--player-button-text-hover);
-			background: var(--player-button-background_hover);
+			background: var(--player-button-background-hover);
 		}
 		button svg{
 			height:100%;
@@ -249,8 +238,8 @@ class VoicesPlayer extends HTMLElement {
 		this.trackAlbum = this.hasAttribute("track-album") ? this.getAttribute("track-album") : null;
 		this.trackArtworkSrc = this.hasAttribute("track-artwork-src") ? this.getAttribute("track-artwork-src") : null;
 	}
-	hhmmss(time_s){
-		let seconds = Math.floor(time_s);
+	hhmmss(_time_s){
+		let seconds = Math.floor(_time_s);
 		let minutes = Math.floor(seconds / 60);
 		let hours = Math.floor(minutes / 60);
 		seconds = seconds % 60;
@@ -260,13 +249,13 @@ class VoicesPlayer extends HTMLElement {
 			minutes.toString().padStart(2, '0')+':'+
 			seconds.toString().padStart(2, '0');
 	}
-	updatePlayerState(_time_s,_percent,_rate,_volume){
-		this.controls.ui_time.innerText = this.hhmmss(_time_s, this.info.overHour);
-		this.controls.ui_percent.style.setProperty('--data-percent', _percent); 
-		this.controls.ui_rate.innerText = _rate; 
-		this.controls.ui_volume.innerText = _volume; 
+	updatePlayerState(){
+		this.controls.ui_time.innerText = this.hhmmss(this.info.time, this.info.overHour);
+		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
+		this.controls.ui_rate.innerText = this.info.rate; 
+		this.controls.ui_volume.innerText = this.info.volume; 
 	}
-	updateSessionState(track){
+	updateSessionState(){
 		if ("mediaSession" in navigator){
 			if ('setPositionState' in navigator.mediaSession) {
 				navigator.mediaSession.setPositionState({
@@ -277,104 +266,142 @@ class VoicesPlayer extends HTMLElement {
 			}
 		}
 	}
-	controlsElements(){
+	playTrack(){
+		this.controls.ui_playpause.innerHTML = this.iconSvg('pause');
+		this.controls.ui_playpause.ariaLabel = this.labels.pause;
+		this.track.play();
+	}
+	pauseTrack(){
+		this.controls.ui_playpause.innerHTML = this.iconSvg('play');
+		this.controls.ui_playpause.ariaLabel = this.labels.play;
+		this.track.pause();
+	}
+	skipTo(_seconds){
+		this.info.percent = (_seconds / this.info.duration * 100)+'%';
+		this.info.time = _seconds;
+		this.track.currentTime = this.info.duration * (_seconds / this.info.duration);
+		if(this.info.state !== 'playing'){
+			this.playTrack();
+		}
+	}
+	seekTo(_event){
+		let rect = _event.target.getBoundingClientRect();
+		let total = rect.width;
+		let x = _event.clientX - rect.left;
+		this.info.percent = (x / total * 100)+'%';
+		let pos = this.info.duration * (x / total);
+		this.track.currentTime = pos;
+		this.updateSessionState();
+	}
+	skipForward(){
+		this.track.currentTime = Math.min(this.track.currentTime + this.options.seekOffset, this.info.duration);
+		this.updateSessionState();
+	}
+	skipBack(){
+		this.track.currentTime = Math.max(this.track.currentTime - this.options.seekOffset, 0);
+		this.updateSessionState();
+	}
+	uiArtwork(){
+		this.controls.ui_artwork = document.createElement("img");
+		this.controls.ui_artwork.id = 'player-artwork';
+		this.controls.ui_artwork.src = this.trackArtworkSrc;
+		this.controls.ui_artwork.width = this.options.baseHeight;
+		this.controls.ui_artwork.height = this.options.baseHeight;
+		this.controls.ui_artwork.loading = 'lazy';
+		this.controls.ui_container.appendChild(this.controls.ui_artwork);
+	}
+	uiSkipBack(){
+		this.controls.ui_skipbackward = document.createElement("button");
+		this.controls.ui_skipbackward.id = 'player-skip-backward';
+		this.controls.ui_skipbackward.ariaLabel = this.labels.skipbackward;
+		this.controls.ui_skipbackward.tabIndex = 0;
+		this.controls.ui_skipbackward.innerHTML = this.iconSvg('skip_back');
+		this.controls.ui_skipbackward.addEventListener('click',()=>{
+			this.skipBack();
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_skipbackward);
+	}
+	uiPlayPause(){
+		this.controls.ui_playpause = document.createElement("button");
+		this.controls.ui_playpause.id = 'player-play-pause';
+		this.controls.ui_playpause.ariaLabel = this.labels.play;
+		this.controls.ui_playpause.tabIndex = 0;
+		this.controls.ui_playpause.innerHTML = this.iconSvg('play');
+		this.controls.ui_playpause.addEventListener('click',()=>{
+			if(this.info.state !== 'playing'){
+				this.playTrack();
+			}
+			if(this.info.state === 'playing'){
+				this.pauseTrack();
+			}
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_playpause);
+	}
+	uiSkipForward(){
+		this.controls.ui_skipforward = document.createElement("button");
+		this.controls.ui_skipforward.id = 'player-skip-forward';
+		this.controls.ui_skipforward.ariaLabel = this.labels.skipforward;
+		this.controls.ui_skipforward.tabIndex = 0;
+		this.controls.ui_skipforward.innerHTML = this.iconSvg('skip_forward');
+		this.controls.ui_skipforward.addEventListener('click',()=>{
+			this.skipForward();
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_skipforward);
+	}
+	uiSeekProgress(){
+		this.controls.ui_percent = document.createElement("span");
+		this.controls.ui_percent.id = 'player-percent';
+		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
+		this.controls.ui_percent.addEventListener('click',(e)=>{
+			this.seekTo(e);
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_percent);
+		this.uiTime();
+		this.uiDuration()
+	}
+	uiTime(){
+		this.controls.ui_time = document.createElement("span");
+		this.controls.ui_time.id = 'player-time';
+		this.controls.ui_time.textContent = this.hhmmss(this.info.time);
+		this.controls.ui_percent.appendChild(this.controls.ui_time);
+	}
+	uiDuration(){
+		this.controls.ui_duration = document.createElement("span");
+		this.controls.ui_duration.id = 'player-duration';
+		this.controls.ui_duration.textContent = this.hhmmss(this.info.duration);
+		this.controls.ui_percent.appendChild(this.controls.ui_duration);
+	}
+	uiRate(){
+		this.controls.ui_rate = document.createElement("span");
+		this.controls.ui_rate.id = 'player-rate';
+		this.controls.ui_rate.textContent = this.info.rate;
+		this.controls.ui_rate.addEventListener('click',(e)=>{
+			console.log('@todo: rate controls', e)
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_rate);
+	}
+	uiVolume(){
+		this.controls.ui_volume = document.createElement("span");
+		this.controls.ui_volume.id = 'player-volume';
+		this.controls.ui_volume.textContent = this.info.volume;
+		this.controls.ui_volume.addEventListener('click',(e)=>{
+			console.log('@todo: volume controls', e)
+		});
+		this.controls.ui_container.appendChild(this.controls.ui_volume);
+	}
+	uiElements(){
 		if(this.trackSrc){
-			// inner container
 			this.controls.ui_container = document.createElement("div");
 			this.controls.ui_container.id = 'player-inner';
-			// artwork
 			if(this.trackArtworkSrc){
-				this.controls.ui_artwork = document.createElement("img");
-				this.controls.ui_artwork.id = 'player-artwork';
-				this.controls.ui_artwork.src = this.trackArtworkSrc;
-				this.controls.ui_artwork.width = this.options.baseHeight;
-				this.controls.ui_artwork.height = this.options.baseHeight;
-				this.controls.ui_artwork.loading = 'lazy';
+				this.uiArtwork();
 			}
-			// skip back
-			this.controls.ui_skipbackward = document.createElement("button");
-			this.controls.ui_skipbackward.id = 'player-skip-backward';
-			this.controls.ui_skipbackward.ariaLabel = this.labels.skipbackward;
-			this.controls.ui_skipbackward.innerHTML = this.controls.ui_icons.skip_back.outerHTML;
-			this.controls.ui_skipbackward.addEventListener('click',()=>{
-				this.track.currentTime = Math.max(this.track.currentTime - this.options.seekOffset, 0);
-				this.updateSessionState(this.track);
-			});
-			// play-pause
-			this.controls.ui_playpause = document.createElement("button");
-			this.controls.ui_playpause.id = 'player-play-pause';
-			this.controls.ui_playpause.ariaLabel = this.labels.play;
-			this.controls.ui_playpause.innerHTML = this.controls.ui_icons.play.outerHTML;
-			this.controls.ui_playpause.addEventListener('click',()=>{
-				if(this.info.state !== 'playing'){
-					this.controls.ui_playpause.innerHTML = this.controls.ui_icons.pause.outerHTML;
-					this.controls.ui_playpause.ariaLabel = this.labels.pause;
-					this.track.play();
-				}
-				if(this.info.state === 'playing'){
-					this.controls.ui_playpause.innerHTML = this.controls.ui_icons.play.outerHTML;
-					this.controls.ui_playpause.ariaLabel = this.labels.play;
-					this.track.pause();
-				}
-			});
-			// skip forward
-			this.controls.ui_skipforward = document.createElement("button");
-			this.controls.ui_skipforward.id = 'player-skip-forward';
-			this.controls.ui_skipforward.ariaLabel = this.labels.skipforward;
-			this.controls.ui_skipforward.innerHTML = this.controls.ui_icons.skip_forward.outerHTML;
-			this.controls.ui_skipforward.addEventListener('click',()=>{
-				this.track.currentTime = Math.min(this.track.currentTime + this.options.seekOffset, this.info.duration);
-				this.updateSessionState(this.track);
-			});
-			// time
-			this.controls.ui_time = document.createElement("span");
-			this.controls.ui_time.id = 'player-time';
-			this.controls.ui_time.textContent = this.hhmmss(this.info.time);
-			// duration
-			this.controls.ui_duration = document.createElement("span");
-			this.controls.ui_duration.id = 'player-duration';
-			this.controls.ui_duration.textContent = this.hhmmss(this.info.duration);
-			// percent
-			this.controls.ui_percent = document.createElement("span");
-			this.controls.ui_percent.id = 'player-percent';
-			this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
-			this.controls.ui_percent.addEventListener('click',(e)=>{
-				let rect = e.target.getBoundingClientRect();
-				let total = rect.width;
-				let x = e.clientX - rect.left;
-				this.info.percent = (x / total * 100)+'%';
-				let pos = this.info.duration * (x / total);
-				this.track.currentTime = pos;
-				this.updateSessionState(this.track);
-			});
-			// rate
-			this.controls.ui_rate = document.createElement("span");
-			this.controls.ui_rate.id = 'player-rate';
-			this.controls.ui_rate.textContent = this.info.rate;
-			this.controls.ui_rate.addEventListener('click',(e)=>{
-				console.log('@todo: rate controls', e)
-			});
-			// volume
-			this.controls.ui_volume = document.createElement("span");
-			this.controls.ui_volume.id = 'player-volume';
-			this.controls.ui_volume.textContent = this.info.volume;
-			this.controls.ui_volume.addEventListener('click',(e)=>{
-				console.log('@todo: volume controls', e)
-			});
-			// add to dom
-			if(this.trackArtworkSrc) this.controls.ui_container.appendChild(this.controls.ui_artwork);
-			
-			this.controls.ui_container.appendChild(this.controls.ui_skipbackward);
-			this.controls.ui_container.appendChild(this.controls.ui_playpause);
-			this.controls.ui_container.appendChild(this.controls.ui_skipforward);
-			
-			this.controls.ui_container.appendChild(this.controls.ui_percent);
-			this.controls.ui_percent.appendChild(this.controls.ui_time);
-			this.controls.ui_percent.appendChild(this.controls.ui_duration);
-			
-			this.controls.ui_container.appendChild(this.controls.ui_rate);
-			this.controls.ui_container.appendChild(this.controls.ui_volume);
-			
+			this.uiSkipBack();
+			this.uiPlayPause();
+			this.uiSkipForward();
+			this.uiSeekProgress();
+			this.uiRate();
+			this.uiVolume();
 			this.shadow.appendChild(this.controls.ui_container);
 		}
 	}
@@ -384,7 +411,7 @@ class VoicesPlayer extends HTMLElement {
 			this.track.addEventListener("loadedmetadata", () => {
 				this.info.duration = this.track.duration;
 				this.info.overHour = Boolean(this.track.duration >= 3600);
-				this.controlsElements();
+				this.uiElements();
 				// media session
 				if ("mediaSession" in navigator) {
 					navigator.mediaSession.metadata = new MediaMetadata({
@@ -397,11 +424,11 @@ class VoicesPlayer extends HTMLElement {
 					});
 					navigator.mediaSession.setActionHandler('play', async () => {
 						await this.track.play();
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('pause', () => {
 						this.track.pause();
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('stop', () => {
 						this.track.pause();
@@ -411,21 +438,21 @@ class VoicesPlayer extends HTMLElement {
 						this.info.rate = 1;
 						this.info.volume = 1;
 						this.info.percent = 0;
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('seekbackward', (details) => {
 						const skipTime = details.seekOffset || this.options.seekOffset;
 						this.track.currentTime = Math.max(this.track.currentTime - skipTime, 0);
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('seekforward', (details) => {
 						const skipTime = details.seekOffset || this.options.seekOffset;
 						this.track.currentTime = Math.min(this.track.currentTime + skipTime, this.track.duration);
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('seekto', (details) => {
 						this.track.currentTime = details.seekTime;
-						this.updateSessionState(this.track);
+						this.updateSessionState();
 					});
 					navigator.mediaSession.setActionHandler('nexttrack', null);
 					navigator.mediaSession.setActionHandler('previoustrack', null);
@@ -434,8 +461,7 @@ class VoicesPlayer extends HTMLElement {
 				this.track.ontimeupdate = (e) =>{
 					this.info.time = e.target.currentTime;
 					this.info.percent = Math.min(100, Math.max(0, (parseFloat(this.info.time/this.info.duration) * 100)))+'%'; // 0-100%
-					this.updatePlayerState(this.info.time,
-						this.info.percent,this.info.rate,this.info.volume);
+					this.updatePlayerState();
 				};
 				this.track.onplay = (e) => {
 					this.info.state = 'playing';
@@ -451,16 +477,14 @@ class VoicesPlayer extends HTMLElement {
 				};
 				this.track.onratechange = (e) => {
 					this.info.rate = this.track.playbackRate;
-					this.updatePlayerState(this.info.time,
-						this.info.percent,this.info.rate,this.info.volume);
+					this.updatePlayerState();
 					if ("mediaSession" in navigator) {
 						navigator.mediaSession.playbackRate = this.info.rate;
 					}
 				};
 				this.track.onvolumechange = (e) => {
 					this.info.volume = this.track.volume;
-					this.updatePlayerState(this.info.time,
-						this.info.percent,this.info.rate,this.info.volume);
+					this.updatePlayerState();
 				};
 				this.track.onended = (e) => {
 					this.info.state = 'stop';
