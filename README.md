@@ -22,14 +22,14 @@ audio.dispatchEvent(event);
 ## Customization
 Options to configure in the script file:
 ```
-noTitle: fallback text for cases where the title attribute is empty (string)
-noArtist: fallback text for cases where the artist attribute is empty (string)
-seekOffset: amount of time to skip forward and backward (seconds)
-baseHeight: height of the player (pixels as int)
-noArtworkBreakpoint: width at which to hide the artwork (container width in pixels as int)
-noDurationBreakpoint: width at which to hide the duration (container width in pixels as int)
-noPercentBreakpoint: width at which to hide the timestamp and seek control UI (container width in pixels as int)
-noSkipBreakpoint: width at which to hide the skip forward and back buttons (container width in pixels as int)
+noTitle: fallback string for cases where the title attribute is empty (default: document.title)
+noArtist: fallback string for cases where the artist attribute is empty (default: window.location.hostname)
+seekOffset: amount of time in seconds to skip forward and backward (default: 30)
+baseHeight: height of the player in pixels (default: 45)
+noArtworkBreakpoint: @container width in pixels at which to hide the artwork (default: 420)
+noDurationBreakpoint: @container width in pixels at which to hide the duration (default: 250)
+noPercentBreakpoint: @container width in pixels at which to hide the timestamp and seek control UI (default: 200)
+noSkipBreakpoint: @container width in pixels at which to hide the skip forward and back buttons (default: 100)
 ```
 CSS variables you can set in your own stylesheet:
 ```
