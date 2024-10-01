@@ -13,10 +13,10 @@ class VoicesPlayer extends HTMLElement {
 			noArtist: window.location.hostname,
 			seekOffset: 30, // seconds
 			baseHeight: 45, // pixels (not incl. padding)
-			noArtworkBreakpoint: 420, // pixels (container width)
-			noDurationBreakpoint: 250, // pixels (container width)
-			noPercentBreakpoint: 200, // pixels (container width)
-			noSkipBreakpoint: 100, // pixels (container width)
+			noArtworkBreakpoint: 420, // pixels (@container width)
+			noDurationBreakpoint: 250, // pixels (@container width)
+			noPercentBreakpoint: 200, // pixels (@container width)
+			noSkipBreakpoint: 100, // pixels (@container width)
 		};
 		// properties
 		this.labels = {
@@ -58,11 +58,11 @@ class VoicesPlayer extends HTMLElement {
 		this.shadow = this.attachShadow({ mode: "open" });
 	}
 	connectedCallback(){
-		this.styleSheet();
 		this.getAttributes();
+		this.styleSheet();
 		this.audioElement();
 		this.addEventListener('voicesPlayerSeconds', (e)=>{
-			if( Number.isInteger(e.detail) )
+			if( Number.isInteger( parseInt(e.detail) ) )
 				this.skipTo(e.detail);
 		});
 	}
