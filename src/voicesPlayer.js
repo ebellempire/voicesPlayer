@@ -110,8 +110,8 @@ class VoicesPlayer extends HTMLElement {
 			
 			container-type: inline-size;
 			container-name: player;
-			display:block;
-			overflow:hidden;
+			display: block;
+			overflow: hidden;
 			font-size: var(--player-font-size);
 			font-family: var(--player-font-family);
 			text-shadow: var(--player-text-shadow);
@@ -124,10 +124,10 @@ class VoicesPlayer extends HTMLElement {
 			min-width: calc(var(--player-button-size) * 1.5);
 		}
 		#player-inner{
-			display:flex;
-			flex-direction:row;
+			display: flex;
+			flex-direction: row;
 			align-items: center;
-			width:100%;
+			width: 100%;
 			min-height: var(--player-base-height);
 		}
 		#player-artwork{
@@ -144,7 +144,7 @@ class VoicesPlayer extends HTMLElement {
 		}
 		@container player (max-width: ${this.options.noArtworkBreakpoint}px){
 			#player-artwork{
-				display:none;
+				display: none;
 			}
 		}
 		button{
@@ -154,8 +154,6 @@ class VoicesPlayer extends HTMLElement {
 			border-radius: var(--player-button-border-radius);
 			border: 0 none transparent;
 			flex-shrink: 0;
-			height: calc(var(--player-button-size) * 0.85);
-			width: calc(var(--player-button-size) * 0.85);
 			cursor: pointer;
 			overflow: hidden;
 		}
@@ -164,22 +162,40 @@ class VoicesPlayer extends HTMLElement {
 			background: var(--player-button-background-hover);
 		}
 		button svg{
-			height:100%;
-			width:100%;
-			object-fit:fill;
+			display: block;
+			height: 100%;
+			width: 100%;
+			object-fit: fill;
+		}
+		#player-play-pause{
+			height: calc(var(--player-button-size) * 0.85);
+			width: calc(var(--player-button-size) * 0.85);
 		}
 		#player-skip-forward,
 		#player-skip-backward{
-			width: calc(var(--player-base-height) * 0.7);
-			height: calc(var(--player-base-height) * 0.7);
+			width: calc(var(--player-base-height) * 0.65);
+			height: calc(var(--player-base-height) * 0.65);
 		}
 		#player-skip-backward{
 			transform: scale(-1, 1);
 		}
+		@container player (max-width: ${this.options.noArtworkBreakpoint}px){
+			#player-play-pause{
+				width: calc(var(--player-base-height) * 0.95);
+				height: calc(var(--player-base-height) * 0.95);
+				padding: 6px;
+			}
+			#player-skip-forward,
+			#player-skip-backward{
+				width: calc(var(--player-base-height) * 0.85);
+				height: calc(var(--player-base-height) * 0.85);
+				padding: 8px;
+			}
+		}
 		@container player (max-width: ${this.options.noSkipBreakpoint}px){
 			#player-skip-forward,
 			#player-skip-backward{
-				display:none;
+				display: none;
 			}
 		}
 		#player-time,
@@ -218,7 +234,7 @@ class VoicesPlayer extends HTMLElement {
 		}
 		@container player (max-width: ${this.options.noPercentBreakpoint}px){
 			#player-percent{
-				display:none;
+				display: none;
 			}
 			#player-inner{
 				justify-content: center;
@@ -226,7 +242,8 @@ class VoicesPlayer extends HTMLElement {
 		}
 		#player-volume,
 		#player-rate{
-			display:none; /* @todo */
+			/* @todo */
+			display: none;
 		}
 		`);
 		this.shadow.adoptedStyleSheets = [css];
