@@ -65,7 +65,7 @@ class VoicesPlayer extends HTMLElement {
 		this.audioElement();
 		this.addEventListener('voicesPlayerSeconds', (e)=>{
 			if( Number.isInteger( parseInt(e.detail) ) )
-				this.skipTo(e.detail);
+				this.skipTo( parseInt(e.detail) );
 		});
 	}
 	disconnectedCallback(){}
@@ -208,7 +208,8 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_skipbackward.id = 'player-skip-backward';
 		this.controls.ui_skipbackward.ariaLabel = this.labels.skipbackward;
 		this.controls.ui_skipbackward.tabIndex = 0;
-		this.controls.ui_skipbackward.innerHTML = this.iconSvg('skip_back');
+		this.controls.ui_skipbackward.style.transform = 'scale(-1, 1)'; // mirror
+		this.controls.ui_skipbackward.innerHTML = this.iconSvg('skip');
 		this.controls.ui_skipbackward.addEventListener('click',()=>{
 			this.skipBack();
 		});
@@ -235,7 +236,7 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_skipforward.id = 'player-skip-forward';
 		this.controls.ui_skipforward.ariaLabel = this.labels.skipforward;
 		this.controls.ui_skipforward.tabIndex = 0;
-		this.controls.ui_skipforward.innerHTML = this.iconSvg('skip_forward');
+		this.controls.ui_skipforward.innerHTML = this.iconSvg('skip');
 		this.controls.ui_skipforward.addEventListener('click',()=>{
 			this.skipForward();
 		});
@@ -283,20 +284,18 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_container.appendChild(this.controls.ui_volume);
 	}
 	uiElements(){
-		if(this.trackSrc){
-			this.controls.ui_container = document.createElement("div");
-			this.controls.ui_container.id = 'player-inner';
-			if(this.trackArtworkSrc){
-				this.uiArtwork();
-			}
-			this.uiSkipBack();
-			this.uiPlayPause();
-			this.uiSkipForward();
-			this.uiSeekProgress();
-			this.uiRate();
-			this.uiVolume();
-			this.shadow.appendChild(this.controls.ui_container);
+		this.controls.ui_container = document.createElement("div");
+		this.controls.ui_container.id = 'player-inner';
+		if(this.trackArtworkSrc){
+			this.uiArtwork();
 		}
+		this.uiSkipBack();
+		this.uiPlayPause();
+		this.uiSkipForward();
+		this.uiSeekProgress();
+		this.uiRate();
+		this.uiVolume();
+		this.shadow.appendChild(this.controls.ui_container);
 	}
 	iconSvg(_iconName){
 		if(!_iconName) return null;
@@ -308,7 +307,7 @@ class VoicesPlayer extends HTMLElement {
 		if(_iconName == 'pause'){
 			icon.innerHTML = `<path style="fill:currentColor;" d="M210.1,508.5h-114.8V3.5h114.8v505ZM416.7,508.5h-114.8V3.5h114.8v505Z"/>`;
 		}
-		if(_iconName == 'skip_forward' || _iconName == 'skip_back'){
+		if(_iconName == 'skip'){
 			icon.innerHTML = `<path style="fill: none;stroke: currentColor;stroke-linecap: square;stroke-miterlimit: 10;stroke-width: 37.4px;" d="M331.2,132.3s28.6-13.9-75.2-13.9-188,83.1-188,185.5,84.2,185.5,188,185.5,188-83.1,188-185.5"/><path style="fill:currentColor;" d="M256,30.3l94,92.8-94,92.8"/>`;
 		}
 		return icon.outerHTML;
@@ -402,9 +401,6 @@ class VoicesPlayer extends HTMLElement {
 		#player-skip-backward{
 			width: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
 			height: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
-		}
-		#player-skip-backward{
-			transform: scale(-1, 1);
 		}
 		#player-time,
 		#player-duration{
