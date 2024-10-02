@@ -82,171 +82,10 @@ class VoicesPlayer extends HTMLElement {
 		}
 		return icon.outerHTML;
 	}
-	styleSheet(){
-		const css = new CSSStyleSheet();
-		css.replaceSync(`
-		:host{
-			--player-font-family: monospace;
-			--player-font-size: 11px;
-			--player-text-color: #eaeaea;
-			--player-text-shadow: 1px 1px 1px rgba(0,0,0,.25);
-			--player-background-color: #000;
-			--player-background-image: linear-gradient(to bottom right, transparent, #222);
-			--player-padding: 4px;
-			--player-border-radius: 7px;
-			--player-base-height: ${this.options.baseHeight}px;
-			--player-artwork-size: var(--player-base-height);
-			--player-artwork-background: #333;
-			--player-button-size: 40px;
-			--player-button-background: transparent;
-			--player-button-background-hover: transparent;
-			--player-button-text: #f2f2f2;
-			--player-button-text-hover: #a2a2a2;
-			--player-button-border-radius: 0;
-			--player-progress-background: #444;
-			--player-progress-color: #a2a2a2;
-			--player-timestamp-color: var(--player-text-color);
-			--player-timestamp-background: rgba(0,0,0,.5);
-			
-			container-type: inline-size;
-			container-name: player;
-			display: block;
-			overflow: hidden;
-			font-size: var(--player-font-size);
-			font-family: var(--player-font-family);
-			text-shadow: var(--player-text-shadow);
-			background-color: var(--player-background-color);
-			background-image: var(--player-background-image);
-			color: var(--player-text-color);
-			padding: var(--player-padding);
-			border-radius: var(--player-border-radius);
-			height: var(--player-base-height);
-			min-width: calc(var(--player-button-size) * 1.5);
 		}
-		#player-inner{
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-			width: 100%;
-			min-height: var(--player-base-height);
 		}
-		#player-artwork{
-			height: var(--player-artwork-size);
-			width: var(--player-artwork-size);
-			object-fit: cover;
-			background: var(--player-artwork-background);
-			margin-right: var(--player-padding);
-			border-radius: clamp( 
-				calc( var(--player-border-radius) / 2 ),
-				calc( var(--player-border-radius) - var(--player-padding) ),
-				var(--player-border-radius)
-			);
 		}
-		@container player (max-width: ${this.options.noArtworkBreakpoint}px){
-			#player-artwork{
-				display: none;
-			}
 		}
-		button{
-			transition: all .15s linear;
-			color: var(--player-button-text);
-			background: var(--player-button-background);
-			border-radius: var(--player-button-border-radius);
-			border: 0 none transparent;
-			flex-shrink: 0;
-			cursor: pointer;
-			overflow: hidden;
-		}
-		button:hover{
-			color: var(--player-button-text-hover);
-			background: var(--player-button-background-hover);
-		}
-		button svg{
-			display: block;
-			height: 100%;
-			width: 100%;
-			object-fit: fill;
-		}
-		#player-play-pause{
-			height: calc(var(--player-button-size) * 0.85);
-			width: calc(var(--player-button-size) * 0.85);
-		}
-		#player-skip-forward,
-		#player-skip-backward{
-			width: calc(var(--player-base-height) * 0.65);
-			height: calc(var(--player-base-height) * 0.65);
-		}
-		#player-skip-backward{
-			transform: scale(-1, 1);
-		}
-		@container player (max-width: ${this.options.noArtworkBreakpoint}px){
-			#player-play-pause{
-				width: calc(var(--player-base-height) * 0.95);
-				height: calc(var(--player-base-height) * 0.95);
-				padding: 6px;
-			}
-			#player-skip-forward,
-			#player-skip-backward{
-				width: calc(var(--player-base-height) * 0.85);
-				height: calc(var(--player-base-height) * 0.85);
-				padding: 8px;
-			}
-		}
-		@container player (max-width: ${this.options.noSkipBreakpoint}px){
-			#player-skip-forward,
-			#player-skip-backward{
-				display: none;
-			}
-		}
-		#player-time,
-		#player-duration{
-			background: var(--player-timestamp-background);
-			color: var(--player-timestamp-color);
-			padding: 0 var(--player-padding);
-			margin: calc( var(--player-padding) / 2 );
-			border-radius: clamp( 
-				calc( var(--player-border-radius) / 2 ),
-				calc( var(--player-border-radius) - var(--player-padding) ),
-				var(--player-border-radius)
-			);
-		}
-		@container player (max-width: ${this.options.noDurationBreakpoint}px){
-			#player-duration{
-				display:none;
-			}
-		}
-		#player-percent{
-			--data-percent: 0%;
-			margin-left: var(--player-padding);
-			height: var(--player-base-height);
-			border-radius: clamp( 
-				calc( var(--player-border-radius) / 2 ),
-				calc( var(--player-border-radius) - var(--player-padding) ),
-				var(--player-border-radius)
-			);
-			flex-grow:1;
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: flex-end;
-			background-color: var(--player-progress-background);
-			background-image: linear-gradient(to right, var(--player-progress-color) 0 var(--data-percent), transparent var(--data-percent) 100%);
-		}
-		@container player (max-width: ${this.options.noPercentBreakpoint}px){
-			#player-percent{
-				display: none;
-			}
-			#player-inner{
-				justify-content: center;
-			}
-		}
-		#player-volume,
-		#player-rate{
-			/* @todo */
-			display: none;
-		}
-		`);
-		this.shadow.adoptedStyleSheets = [css];
 	}
 	getAttributes(){
 		this.trackSrc = this.hasAttribute("track-src") ? this.getAttribute("track-src") : null;
@@ -421,6 +260,180 @@ class VoicesPlayer extends HTMLElement {
 			this.uiVolume();
 			this.shadow.appendChild(this.controls.ui_container);
 		}
+	}
+	styleSheet(){
+		const css = new CSSStyleSheet();
+		css.replaceSync(`
+		:host{
+			--player-font-family: monospace;
+			--player-font-size: 11px;
+			--player-text-color: #eaeaea;
+			--player-text-shadow: 1px 1px 1px rgba(0,0,0,.25);
+			--player-background-color: #000;
+			--player-background-image: linear-gradient(to bottom right, transparent, #222);
+			--player-padding: 4px;
+			--player-border-radius: 7px;
+			--player-base-height: ${this.options.baseHeight}px;
+			--player-artwork-size: var(--player-base-height);
+			--player-artwork-background: #333;
+			--player-button-size: calc(var(--player-base-height) * 0.85);
+			--player-button-background: transparent;
+			--player-button-background-hover: transparent;
+			--player-button-text: #f2f2f2;
+			--player-button-text-hover: #a2a2a2;
+			--player-button-border-radius: 0;
+			--player-progress-background: #444;
+			--player-progress-color: #a2a2a2;
+			--player-timestamp-color: var(--player-text-color);
+			--player-timestamp-background: rgba(0,0,0,.5);
+			
+			container-type: inline-size;
+			container-name: player;
+			display: block;
+			overflow: hidden;
+			font-size: var(--player-font-size);
+			font-family: var(--player-font-family);
+			text-shadow: var(--player-text-shadow);
+			background-color: var(--player-background-color);
+			background-image: var(--player-background-image);
+			color: var(--player-text-color);
+			padding: var(--player-padding);
+			border-radius: var(--player-border-radius);
+			height: var(--player-base-height);
+			min-width: calc(var(--player-button-size) * 1.5);
+		}
+		#player-inner{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			width: 100%;
+			min-height: var(--player-base-height);
+		}
+		#player-artwork{
+			transition: all .15s linear;
+			height: var(--player-artwork-size);
+			width: var(--player-artwork-size);
+			object-fit: cover;
+			background: var(--player-artwork-background);
+			margin-right: var(--player-padding);
+			border-radius: clamp( 
+				calc( var(--player-border-radius) / 2 ),
+				calc( var(--player-border-radius) - var(--player-padding) ),
+				var(--player-border-radius)
+			);
+		}
+		button{
+			transition: all .15s linear;
+			height: var(--player-button-size);
+			width: var(--player-button-size);
+			transition: all .15s linear;
+			color: var(--player-button-text);
+			background: var(--player-button-background);
+			border-radius: var(--player-button-border-radius);
+			border: 0 none transparent;
+			flex-shrink: 0;
+			cursor: pointer;
+			overflow: hidden;
+		}
+		button:hover{
+			color: var(--player-button-text-hover);
+			background: var(--player-button-background-hover);
+		}
+		button svg{
+			display: block;
+		}
+		#player-play-pause{
+			height: clamp(32px, var(--player-button-size), 45px);
+			width: clamp(32px, var(--player-button-size), 45px);
+		}
+		#player-skip-forward,
+		#player-skip-backward{
+			width: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
+			height: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
+		}
+		#player-skip-backward{
+			transform: scale(-1, 1);
+		}
+		#player-time,
+		#player-duration{
+			transition: all .15s linear;
+			background: var(--player-timestamp-background);
+			color: var(--player-timestamp-color);
+			padding: 0 var(--player-padding);
+			margin: calc( var(--player-padding) / 2 );
+			border-radius: clamp( 
+				calc( var(--player-border-radius) / 2 ),
+				calc( var(--player-border-radius) - var(--player-padding) ),
+				var(--player-border-radius)
+			);
+		}
+		#player-percent{
+			--data-percent: 0%;
+			margin-left: var(--player-padding);
+			height: var(--player-base-height);
+			border-radius: clamp( 
+				calc( var(--player-border-radius) / 2 ),
+				calc( var(--player-border-radius) - var(--player-padding) ),
+				var(--player-border-radius)
+			);
+			flex-grow:1;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: flex-end;
+			background-color: var(--player-progress-background);
+			background-image: linear-gradient(to right, var(--player-progress-color) 0 var(--data-percent), transparent var(--data-percent) 100%);
+		}
+		#player-volume,
+		#player-rate{
+			/* @todo */
+			display: none;
+		}
+		@container player (max-width: 440px){
+			/* mobile-specific adjustments */
+			#player-play-pause{
+				height: clamp(37px, var(--player-button-size), 50px);
+				width: clamp(37px, var(--player-button-size), 50px);
+				padding: 6px 6px;
+			}
+			#player-skip-forward,
+			#player-skip-backward{
+				height: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
+				width: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
+				padding: 8px 8px;
+			}
+		}
+		@container player (max-width: ${this.options.breakpoints.noArtwork}px){
+			#player-artwork{
+				opacity: 0;
+				width: 0;
+			}
+		}
+		@container player (max-width: ${this.options.breakpoints.noDuration}px){
+			#player-duration{
+				opacity: 0;
+				width: 0;
+			}
+		}
+		@container player (max-width: ${this.options.breakpoints.noPercent}px){
+			#player-percent{
+				transition: all .15s linear;
+				opacity: 0;
+				width: 0;
+				flex-grow: 0;
+			}
+			#player-inner{
+				justify-content: center;
+			}
+		}
+		@container player (max-width: ${this.options.breakpoints.noSkip}px){
+			#player-skip-forward,
+			#player-skip-backward{
+				display: none;
+			}
+		}
+		`);
+		this.shadow.adoptedStyleSheets = [css];
 	}
 	audioElement(){
 		if(this.trackSrc){
