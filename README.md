@@ -20,18 +20,16 @@ let event = new CustomEvent("voicesPlayerSeconds", { detail: seconds});
 audio.dispatchEvent(event);
 ```
 ## Customization
-Options to configure in the script file:
+Some configurations may be passed as option attributes:
 ```
-noTitle: fallback string for cases where the title attribute is empty (default: document.title)
-noArtist: fallback string for cases where the artist attribute is empty (default: window.location.hostname)
-seekOffset: amount of time in seconds to skip forward and backward (default: 30)
-baseHeight: height of the player in pixels (default: 45)
-noArtworkBreakpoint: @container width in pixels at which to hide the artwork (default: 420)
-noDurationBreakpoint: @container width in pixels at which to hide the duration (default: 250)
-noPercentBreakpoint: @container width in pixels at which to hide the timestamp and seek control UI (default: 200)
-noSkipBreakpoint: @container width in pixels at which to hide the skip forward and back buttons (default: 100)
+<voices-player 
+  ...
+  option-breakpoints="440,250,200,100"
+  option-base-height="40"
+  option-seek-offset="30"
+></voices-player>
 ```
-CSS variables you can set in your own stylesheet:
+Some CSS variables you can set in your own stylesheet:
 ```
 --player-font-family
 --player-font-size
@@ -55,7 +53,7 @@ CSS variables you can set in your own stylesheet:
 --player-timestamp-color
 --player-timestamp-background
 ```
-
+If you need more customization than this allows, you should probably create a fork.
 ## Notes
 - Currently supports only one audio track at a time.
 - Currently only supports a single codec per track so MP3 is recommended.
