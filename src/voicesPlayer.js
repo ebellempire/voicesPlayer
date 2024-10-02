@@ -67,20 +67,9 @@ class VoicesPlayer extends HTMLElement {
 		});
 	}
 	disconnectedCallback(){}
-	iconSvg(_iconName){
-		if(!_iconName) return null;
-		let icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		icon.setAttribute("viewBox", "0 0 512 512");
-		if(_iconName == 'play'){
-			icon.innerHTML = `<path style="fill:currentColor;" d="M81.2,508.5l420.8-252.5L81.2,3.5v505Z"/>`;
 		}
-		if(_iconName == 'pause'){
-			icon.innerHTML = `<path style="fill:currentColor;" d="M210.1,508.5h-114.8V3.5h114.8v505ZM416.7,508.5h-114.8V3.5h114.8v505Z"/>`;
 		}
-		if(_iconName == 'skip_forward' || _iconName == 'skip_back'){
-			icon.innerHTML = `<path style="fill: none;stroke: currentColor;stroke-linecap: square;stroke-miterlimit: 10;stroke-width: 37.4px;" d="M331.2,132.3s28.6-13.9-75.2-13.9-188,83.1-188,185.5,84.2,185.5,188,185.5,188-83.1,188-185.5"/><path style="fill:currentColor;" d="M256,30.3l94,92.8-94,92.8"/>`;
 		}
-		return icon.outerHTML;
 	}
 		}
 		}
@@ -260,6 +249,21 @@ class VoicesPlayer extends HTMLElement {
 			this.uiVolume();
 			this.shadow.appendChild(this.controls.ui_container);
 		}
+	}
+	iconSvg(_iconName){
+		if(!_iconName) return null;
+		let icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		icon.setAttribute("viewBox", "0 0 512 512");
+		if(_iconName == 'play'){
+			icon.innerHTML = `<path style="fill:currentColor;" d="M81.2,508.5l420.8-252.5L81.2,3.5v505Z"/>`;
+		}
+		if(_iconName == 'pause'){
+			icon.innerHTML = `<path style="fill:currentColor;" d="M210.1,508.5h-114.8V3.5h114.8v505ZM416.7,508.5h-114.8V3.5h114.8v505Z"/>`;
+		}
+		if(_iconName == 'skip_forward' || _iconName == 'skip_back'){
+			icon.innerHTML = `<path style="fill: none;stroke: currentColor;stroke-linecap: square;stroke-miterlimit: 10;stroke-width: 37.4px;" d="M331.2,132.3s28.6-13.9-75.2-13.9-188,83.1-188,185.5,84.2,185.5,188,185.5,188-83.1,188-185.5"/><path style="fill:currentColor;" d="M256,30.3l94,92.8-94,92.8"/>`;
+		}
+		return icon.outerHTML;
 	}
 	styleSheet(){
 		const css = new CSSStyleSheet();
