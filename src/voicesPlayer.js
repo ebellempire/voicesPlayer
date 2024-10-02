@@ -12,11 +12,13 @@ class VoicesPlayer extends HTMLElement {
 			noTitle: document.title,
 			noArtist: window.location.hostname,
 			seekOffset: 30, // seconds
-			baseHeight: 45, // pixels (not incl. padding)
-			noArtworkBreakpoint: 420, // pixels (@container width)
-			noDurationBreakpoint: 250, // pixels (@container width)
-			noPercentBreakpoint: 200, // pixels (@container width)
-			noSkipBreakpoint: 100, // pixels (@container width)
+			baseHeight: 40, // px (not incl. padding)
+			breakpoints: {
+				noArtwork: 440, // px (@container width, hide artwork)
+				noDuration: 250, // px (@container width, hide duration time)
+				noPercent: 200, // px (@container width, hide seek ui)
+				noSkip: 100, // px (@container width, hide skip ahead/back buttons)
+			},
 		};
 		// properties
 		this.labels = {
@@ -67,21 +69,67 @@ class VoicesPlayer extends HTMLElement {
 		});
 	}
 	disconnectedCallback(){}
-		}
-		}
-		}
-	}
-		}
-		}
-		}
-		}
-	}
 	getAttributes(){
+		// track info
 		this.trackSrc = this.hasAttribute("track-src") ? this.getAttribute("track-src") : null;
 		this.trackTitle = this.hasAttribute("track-title") ? this.getAttribute("track-title") : this.options.noTitle;
 		this.trackArtist = this.hasAttribute("track-artist") ? this.getAttribute("track-artist") : this.options.noArtist;
 		this.trackAlbum = this.hasAttribute("track-album") ? this.getAttribute("track-album") : null;
 		this.trackArtworkSrc = this.hasAttribute("track-artwork-src") ? this.getAttribute("track-artwork-src") : null;
+		// player options
+		if(this.hasAttribute("option-breakpoints")){
+			let ob = this.getAttribute("option-breakpoints");
+			if(ob) this.configureBreakpoints(ob);
+		}
+		if(this.hasAttribute("option-base-height")){
+			let obh = this.getAttribute("option-base-height");
+			if(obh) this.configureBaseHeight(obh);
+		}
+		if(this.hasAttribute("option-seek-offset")){
+			let oso = this.getAttribute("option-seek-offset");
+			if(oso) this.configureSeekOffset(oso);
+		}
+	}
+	configureSeekOffset(string){
+		let n = parseInt(string.trim());
+		if(!Number.isInteger(n)){
+			console.warn('voicesPlayer: option-seek-offset attribute value must be a positive integer. The provided value ('+string+') will be ignored.');
+			return null;
+		}
+		if(n !== this.options.seekOffset){
+			this.labels.skipforward = 'Skip ahead '+n+' seconds'
+			this.labels.skipbackward = 'Skip back '+n+' seconds'
+		}
+		this.options.seekOffset = n;
+	}
+	configureBaseHeight(string, min = 40){
+		let n = parseInt(string.trim());
+		if(!Number.isInteger(n)){
+			console.warn('voicesPlayer: option-base-height attribute value must be an integer. The provided value ('+string+') will be ignored.');
+			return null;
+		}
+		if(n < min){
+			console.warn('voicesPlayer: option-base-height attribute value must be an integer greater than '+min+'. The provided value ('+string+') will be rounded up.');
+			n = Math.max(n,min);
+		}
+		this.options.baseHeight = n;
+	}
+	configureBreakpoints(string){
+		let length = Object.keys(this.options.breakpoints).length;
+		let warn = 'voicesPlayer: option-breakpoints attribute value must be a comma-separated string of exactly '+length+' positive numbers. The provided value ('+string+') will be ignored.';
+		let arr = string.split(',');
+		if(arr.length !== length){
+			console.warn(warn);
+			return null;
+		}
+		arr.forEach((t, i)=>{
+			let n = parseInt(t.trim());
+			if(!Number.isInteger(n) || n <= 0){
+				console.warn(warn);
+				return null;
+			}
+			this.options.breakpoints[Object.keys(this.options.breakpoints)[i]] = n
+		});
 	}
 	hhmmss(_time_s){
 		let seconds = Math.floor(_time_s);
