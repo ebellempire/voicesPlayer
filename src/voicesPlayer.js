@@ -12,7 +12,7 @@ class VoicesPlayer extends HTMLElement {
 			noTitle: document.title,
 			noArtist: window.location.hostname,
 			seekOffset: 30, // seconds
-			baseHeight: 40, // px (not incl. padding)
+			baseHeight: 40, // 40-80 px (not incl. padding)
 			breakpoints: {
 				noArtwork: 440, // px (@container width, hide artwork)
 				noDuration: 250, // px (@container width, hide duration time)
@@ -102,15 +102,15 @@ class VoicesPlayer extends HTMLElement {
 		}
 		this.options.seekOffset = n;
 	}
-	configureBaseHeight(string, min = 40){
+	configureBaseHeight(string, min = 40, max = 80){
 		let n = parseInt(string.trim());
 		if(!Number.isInteger(n)){
 			console.warn('voicesPlayer: option-base-height attribute value must be an integer. The provided value ('+string+') will be ignored.');
 			return null;
 		}
-		if(n < min){
-			console.warn('voicesPlayer: option-base-height attribute value must be an integer greater than '+min+'. The provided value ('+string+') will be rounded up.');
-			n = Math.max(n,min);
+		if(n < min || n > max){
+			console.warn('voicesPlayer: option-base-height attribute value must be an integer greater than '+min+' and less than '+max+'. The provided value ('+string+') will be rounded to fit within that range.');
+			n = Math.min(Math.max(n,min), max);
 		}
 		this.options.baseHeight = n;
 	}
