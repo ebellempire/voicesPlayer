@@ -394,13 +394,15 @@ class VoicesPlayer extends HTMLElement {
 			display: block;
 		}
 		#player-play-pause{
-			height: clamp(32px, var(--player-button-size), 45px);
-			width: clamp(32px, var(--player-button-size), 45px);
+			height: clamp(37px, var(--player-button-size), 50px);
+			width: clamp(37px, var(--player-button-size), 50px);
+			padding: 6px 6px;
 		}
 		#player-skip-forward,
 		#player-skip-backward{
-			width: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
-			height: clamp(27px, calc(var(--player-button-size) * 0.75), 40px);
+			height: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
+			width: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
+			padding: 8px 8px;
 		}
 		#player-time,
 		#player-duration{
@@ -436,20 +438,6 @@ class VoicesPlayer extends HTMLElement {
 		#player-rate{
 			/* @todo */
 			display: none;
-		}
-		@container player (max-width: 440px){
-			/* mobile-specific adjustments */
-			#player-play-pause{
-				height: clamp(37px, var(--player-button-size), 50px);
-				width: clamp(37px, var(--player-button-size), 50px);
-				padding: 6px 6px;
-			}
-			#player-skip-forward,
-			#player-skip-backward{
-				height: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
-				width: clamp(35px, calc(var(--player-button-size) * 0.75), 50px);
-				padding: 8px 8px;
-			}
 		}
 		@container player (max-width: ${this.options.breakpoints.noArtwork}px){
 			#player-artwork{
