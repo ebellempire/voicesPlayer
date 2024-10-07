@@ -352,6 +352,11 @@ class VoicesPlayer extends HTMLElement {
 			border-radius: var(--player-border-radius);
 			height: var(--player-base-height);
 			min-width: calc(var(--player-button-size) * 1.5);
+			transition: opacity .15s linear;
+			opacity: 0;
+		}
+		:host([data-loaded]){
+			opacity: 1;
 		}
 		#player-inner{
 			display: flex;
@@ -478,6 +483,7 @@ class VoicesPlayer extends HTMLElement {
 				this.info.duration = this.track.duration;
 				this.info.overHour = Boolean(this.track.duration >= 3600);
 				this.uiElements();
+				this.setAttribute('data-loaded', true); // opacity 1
 				// media session
 				if ("mediaSession" in navigator) {
 					navigator.mediaSession.metadata = new MediaMetadata({
