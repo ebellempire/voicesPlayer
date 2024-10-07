@@ -424,6 +424,8 @@ class VoicesPlayer extends HTMLElement {
 		}
 		#player-percent{
 			--data-percent: 0%;
+			transform: translateZ(0);
+			will-change: background-image;
 			margin-left: var(--player-padding);
 			height: var(--player-base-height);
 			border-radius: clamp( 
