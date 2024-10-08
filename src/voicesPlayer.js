@@ -182,9 +182,9 @@ class VoicesPlayer extends HTMLElement {
 		}
 	}
 	seekTo(_event){
-		let rect = _event.target.getBoundingClientRect();
+		let rect = this.controls.ui_percent.getBoundingClientRect();
 		let total = rect.width;
-		let x = _event.clientX - rect.left;
+		let x = Math.max(0, Math.min(_event.clientX - rect.left, total));
 		this.info.percent = (x / total * 100)+'%';
 		let pos = this.info.duration * (x / total);
 		this.track.currentTime = pos;
