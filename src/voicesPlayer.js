@@ -216,7 +216,11 @@ class VoicesPlayer extends HTMLElement {
 		this.info.percent = (x / total * 100)+'%';
 		let pos = this.info.duration * (x / total);
 		this.track.currentTime = pos;
-		this.debouncedUpdateState();
+		if(this.info.isDragging){
+			this.debouncedUpdateState();
+		}else{
+			this.updateSessionState();
+		}
 	}
 	seekDrag(_event){
 		if(!this.info.isDragging) return;
