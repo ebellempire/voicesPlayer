@@ -344,6 +344,7 @@ class VoicesPlayer extends HTMLElement {
 			
 			container-type: inline-size;
 			container-name: player;
+			user-select: none;
 			display: block;
 			overflow: hidden;
 			font-size: var(--player-font-size);
@@ -383,6 +384,7 @@ class VoicesPlayer extends HTMLElement {
 			);
 		}
 		button{
+			user-select: none;
 			transition: all .15s linear;
 			height: var(--player-button-size);
 			width: var(--player-button-size);
@@ -415,6 +417,7 @@ class VoicesPlayer extends HTMLElement {
 		}
 		#player-time,
 		#player-duration{
+			user-select: none;
 			transition: all .15s linear;
 			background: var(--player-timestamp-background);
 			color: var(--player-timestamp-color);
