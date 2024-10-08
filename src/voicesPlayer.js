@@ -35,6 +35,7 @@ class VoicesPlayer extends HTMLElement {
 			state: 'stop',
 			duration: 0,
 			overHour: false,
+			isDragging: false,
 		}
 		this.controls = {
 			ui_container: null,
@@ -190,6 +191,10 @@ class VoicesPlayer extends HTMLElement {
 		this.track.currentTime = pos;
 		this.updateSessionState();
 	}
+	seekDrag(_event){
+		if(!this.info.isDragging) return;
+		this.seekTo(_event);
+	}
 	skipForward(){
 		this.track.currentTime = Math.min(this.track.currentTime + this.options.seekOffset, this.info.duration);
 		this.updateSessionState();
@@ -250,8 +255,26 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_percent = document.createElement("span");
 		this.controls.ui_percent.id = 'player-percent';
 		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
-		this.controls.ui_percent.addEventListener('click',(e)=>{
-			this.seekTo(e);
+		this.controls.ui_percent.addEventListener('mousedown',(e)=>{
+			if(this.info.state === 'playing') this.pauseTrack();
+			const mouseMove = (e) => {
+				this.info.isDragging = true;
+				this.seekDrag(e);
+			};
+			const mouseUp = (e) => {
+				if(!this.info.isDragging){
+					console.log('it was a click');
+					this.seekTo(e);
+				}else{
+					this.info.isDragging = false;
+					console.log('it was a drag');
+				}
+				this.playTrack();
+				document.removeEventListener('mousemove', mouseMove);
+				document.removeEventListener('mouseup', mouseUp);
+			};
+			document.addEventListener('mousemove', mouseMove);
+			document.addEventListener('mouseup', mouseUp);
 		});
 		this.controls.ui_container.appendChild(this.controls.ui_percent);
 		this.uiTime();
