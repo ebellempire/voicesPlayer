@@ -309,6 +309,19 @@ class VoicesPlayer extends HTMLElement {
 			document.addEventListener('mousemove', mouseMove);
 			document.addEventListener('mouseup', mouseUp);
 		});
+		this.controls.ui_percent.setAttribute('role', 'slider');
+		this.controls.ui_percent.setAttribute('aria-label', 'Seek slider');
+		this.controls.ui_percent.setAttribute('tabindex', '0');
+		this.controls.ui_percent.addEventListener('keydown', (e) => {
+			switch(e.key) {
+				case 'ArrowRight':
+					this.skipForward();
+					break;
+				case 'ArrowLeft':
+					this.skipBack();
+					break;
+			}
+		});
 		this.controls.ui_container.appendChild(this.controls.ui_percent);
 		this.uiTime();
 		this.uiDuration()
@@ -346,6 +359,8 @@ class VoicesPlayer extends HTMLElement {
 	uiElements(){
 		this.controls.ui_container = document.createElement("div");
 		this.controls.ui_container.id = 'player-inner';
+		this.controls.ui_container.setAttribute('role', 'region');
+		this.controls.ui_container.setAttribute('aria-label', 'Audio player controls');
 		if(this.trackArtworkSrc){
 			this.uiArtwork();
 		}
