@@ -187,6 +187,18 @@ class VoicesPlayer extends HTMLElement {
 			}
 		}
 	}
+	uiSetDragging(isDragging){
+		if(isDragging){
+			this.info.isDragging = true;
+			this.controls.ui_percent.style.setProperty('cursor', 'grabbing'); 
+			return null;
+		}
+		this.info.isDragging = false;
+		this.controls.ui_percent.style.setProperty('cursor', 'grab'); 
+	}
+	uiSetProgressValue(){
+		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
+	}
 	async playTrack(){
 		this.controls.ui_playpause.innerHTML = this.iconSvg('pause');
 		this.controls.ui_playpause.ariaLabel = this.labels.pause;
@@ -287,11 +299,11 @@ class VoicesPlayer extends HTMLElement {
 	uiSeekProgress(){
 		this.controls.ui_percent = document.createElement("span");
 		this.controls.ui_percent.id = 'player-percent';
-		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
+		this.uiSetProgressValue();
 		this.controls.ui_percent.addEventListener('mousedown',(e)=>{
 			if(this.info.state === 'playing') this.pauseTrack();
 			const mouseMove = (e) => {
-				this.info.isDragging = true;
+				this.uiSetDragging(true);
 				this.seekDrag(e);
 			};
 			const mouseUp = (e) => {
@@ -300,7 +312,7 @@ class VoicesPlayer extends HTMLElement {
 					this.seekTo(e);
 				}else{
 					// console.log('it was a drag');
-					this.info.isDragging = false;
+					this.uiSetDragging(false);
 				}
 				this.playTrack();
 				document.removeEventListener('mousemove', mouseMove);
@@ -519,6 +531,7 @@ class VoicesPlayer extends HTMLElement {
 			align-items: flex-end;
 			background-color: var(--player-progress-background);
 			background-image: linear-gradient(to right, var(--player-progress-color) 0 var(--data-percent), transparent var(--data-percent) 100%);
+			cursor: grab;
 		}
 		#player-volume,
 		#player-rate{
