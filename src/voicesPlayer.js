@@ -57,6 +57,11 @@ class VoicesPlayer extends HTMLElement {
 		}
 		// the audio track
 		this.track = null;
+		// debounce 16ms/~60hz
+		this.debouncedUpdateState = this.debounce(() => {
+			this.updatePlayerState();
+			this.updateSessionState();
+		}, 16); 
 		// shadow dom
 		this.shadow = this.attachShadow({ mode: "open" });
 	}
@@ -70,6 +75,17 @@ class VoicesPlayer extends HTMLElement {
 		});
 	}
 	disconnectedCallback(){}
+	debounce(func, wait) {
+		let timeout;
+		return function executedFunction(...args) {
+			const later = () => {
+				clearTimeout(timeout);
+				func(...args);
+			};
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+		};
+	}
 	getAttributes(){
 		// track info
 		this.trackSrc = this.hasAttribute("track-src") ? this.getAttribute("track-src") : null;
@@ -189,11 +205,13 @@ class VoicesPlayer extends HTMLElement {
 		this.info.percent = (x / total * 100)+'%';
 		let pos = this.info.duration * (x / total);
 		this.track.currentTime = pos;
-		this.updateSessionState();
+		this.debouncedUpdateState();
 	}
 	seekDrag(_event){
 		if(!this.info.isDragging) return;
-		this.seekTo(_event);
+		requestAnimationFrame(() => {
+			this.seekTo(_event);
+		});
 	}
 	skipForward(){
 		this.track.currentTime = Math.min(this.track.currentTime + this.options.seekOffset, this.info.duration);
