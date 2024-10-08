@@ -171,10 +171,10 @@ class VoicesPlayer extends HTMLElement {
 			seconds.toString().padStart(2, '0');
 	}
 	updatePlayerState(){
-		this.controls.ui_time.innerText = this.hhmmss(this.info.time, this.info.overHour);
-		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
-		this.controls.ui_rate.innerText = this.info.rate; 
-		this.controls.ui_volume.innerText = this.info.volume; 
+		this.uiSetProgressValue();
+		this.uiSetTimeValue();
+		this.uiSetRateValue();
+		this.uiSetVolumeValue();
 	}
 	updateSessionState(){
 		if ("mediaSession" in navigator){
@@ -198,6 +198,18 @@ class VoicesPlayer extends HTMLElement {
 	}
 	uiSetProgressValue(){
 		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
+	}
+	uiSetTimeValue(){
+		this.controls.ui_time.textContent = this.hhmmss(this.info.time);
+	}
+	uiSetDurationValue(){
+		this.controls.ui_duration.textContent = this.hhmmss(this.info.duration);
+	}
+	uiSetRateValue(){
+		this.controls.ui_rate.textContent = this.info.rate; 
+	}
+	uiSetVolumeValue(){
+		this.controls.ui_volume.textContent = this.info.volume; 
 	}
 	async playTrack(){
 		this.controls.ui_playpause.innerHTML = this.iconSvg('pause');
@@ -341,19 +353,19 @@ class VoicesPlayer extends HTMLElement {
 	uiTime(){
 		this.controls.ui_time = document.createElement("span");
 		this.controls.ui_time.id = 'player-time';
-		this.controls.ui_time.textContent = this.hhmmss(this.info.time);
+		this.uiSetTimeValue();
 		this.controls.ui_percent.appendChild(this.controls.ui_time);
 	}
 	uiDuration(){
 		this.controls.ui_duration = document.createElement("span");
 		this.controls.ui_duration.id = 'player-duration';
-		this.controls.ui_duration.textContent = this.hhmmss(this.info.duration);
+		this.uiSetDurationValue();
 		this.controls.ui_percent.appendChild(this.controls.ui_duration);
 	}
 	uiRate(){
 		this.controls.ui_rate = document.createElement("span");
 		this.controls.ui_rate.id = 'player-rate';
-		this.controls.ui_rate.textContent = this.info.rate;
+		this.uiSetRateValue();
 		this.controls.ui_rate.addEventListener('click',(e)=>{
 			console.log('@todo: rate controls', e)
 		});
@@ -362,7 +374,7 @@ class VoicesPlayer extends HTMLElement {
 	uiVolume(){
 		this.controls.ui_volume = document.createElement("span");
 		this.controls.ui_volume.id = 'player-volume';
-		this.controls.ui_volume.textContent = this.info.volume;
+		this.uiSetVolumeValue();
 		this.controls.ui_volume.addEventListener('click',(e)=>{
 			console.log('@todo: volume controls', e)
 		});
