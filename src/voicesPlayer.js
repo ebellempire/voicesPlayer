@@ -74,7 +74,22 @@ class VoicesPlayer extends HTMLElement {
 				this.skipTo( parseInt(e.detail) );
 		});
 	}
-	disconnectedCallback(){}
+	disconnectedCallback(){
+		if (this.track) {
+			this.track.pause();
+			this.track.src = '';
+			this.track.load();
+			this.track = null;
+		}
+		this.removeEventListener('voicesPlayerSeconds');
+		this.controls.ui_percent.removeEventListener('mousedown');
+		this.controls.ui_percent.removeEventListener('keydown');
+		this.controls.ui_playpause.removeEventListener('click');
+		this.controls.ui_skipbackward.removeEventListener('click');
+		this.controls.ui_skipforward.removeEventListener('click');
+		this.controls.ui_rate.removeEventListener('click');
+		this.controls.ui_volume.removeEventListener('click');
+	}
 	debounce(func, wait) {
 		let timeout;
 		return function executedFunction(...args) {
