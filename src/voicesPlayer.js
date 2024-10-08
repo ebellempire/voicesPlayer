@@ -69,10 +69,6 @@ class VoicesPlayer extends HTMLElement {
 		this.getAttributes();
 		this.styleSheet();
 		this.audioElement();
-		this.addEventListener('voicesPlayerSeconds', (e)=>{
-			if( Number.isInteger( parseInt(e.detail) ) )
-				this.skipTo( parseInt(e.detail) );
-		});
 	}
 	disconnectedCallback(){
 		if (this.track) {
@@ -296,11 +292,11 @@ class VoicesPlayer extends HTMLElement {
 			};
 			const mouseUp = (e) => {
 				if(!this.info.isDragging){
-					console.log('it was a click');
+					// console.log('it was a click');
 					this.seekTo(e);
 				}else{
+					// console.log('it was a drag');
 					this.info.isDragging = false;
-					console.log('it was a drag');
 				}
 				this.playTrack();
 				document.removeEventListener('mousemove', mouseMove);
@@ -371,6 +367,7 @@ class VoicesPlayer extends HTMLElement {
 		this.uiRate();
 		this.uiVolume();
 		this.shadow.appendChild(this.controls.ui_container);
+		this.setAttribute('data-loaded', true); // player becomes visible
 	}
 	iconSvg(_iconName){
 		if(!_iconName) return null;
@@ -556,6 +553,112 @@ class VoicesPlayer extends HTMLElement {
 		`);
 		this.shadow.adoptedStyleSheets = [css];
 	}
+	sessionEventTracking(){
+		if ("mediaSession" in navigator) {
+			navigator.mediaSession.metadata = new MediaMetadata({
+				title: this.trackTitle,
+				artist: this.trackArtist,
+				album: this.trackAlbum,
+				artwork: [{
+					src: this.trackArtworkSrc
+				}]
+			});
+			navigator.mediaSession.setActionHandler('play', async () => {
+				await this.track.play();
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('pause', () => {
+				this.track.pause();
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('stop', () => {
+				this.track.pause();
+				this.track.currentTime = 0;
+				this.info.state = 'stop';
+				this.info.time = 0;
+				this.info.rate = 1;
+				this.info.volume = 1;
+				this.info.percent = 0;
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+				const skipTime = details.seekOffset || this.options.seekOffset;
+				this.track.currentTime = Math.max(this.track.currentTime - skipTime, 0);
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('seekforward', (details) => {
+				const skipTime = details.seekOffset || this.options.seekOffset;
+				this.track.currentTime = Math.min(this.track.currentTime + skipTime, this.track.duration);
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('seekto', (details) => {
+				this.track.currentTime = details.seekTime;
+				this.updateSessionState();
+			});
+			navigator.mediaSession.setActionHandler('nexttrack', null);
+			navigator.mediaSession.setActionHandler('previoustrack', null);
+		}
+	}
+	audioEventTracking(){
+		// external
+		this.addEventListener('voicesPlayerSeconds', (e)=>{
+			if( Number.isInteger( parseInt(e.detail) ) )
+				this.skipTo( parseInt(e.detail) );
+		});
+		// internal
+		this.track.ontimeupdate = (e) =>{
+			this.info.time = e.target.currentTime;
+			this.info.percent = Math.min(100, Math.max(0, (parseFloat(this.info.time/this.info.duration) * 100)))+'%'; // 0-100%
+			this.updatePlayerState();
+		};
+		this.track.onplay = (e) => {
+			this.info.state = 'playing';
+			if ("mediaSession" in navigator){
+				navigator.mediaSession.playbackState = 'playing';
+			}
+		};
+		this.track.onpause = (e) => {
+			this.info.state = 'paused';
+			if ("mediaSession" in navigator){
+				navigator.mediaSession.playbackState = 'paused';
+			}
+		};
+		this.track.onratechange = (e) => {
+			this.info.rate = this.track.playbackRate;
+			this.updatePlayerState();
+			if ("mediaSession" in navigator) {
+				navigator.mediaSession.playbackRate = this.info.rate;
+			}
+		};
+		this.track.onvolumechange = (e) => {
+			this.info.volume = this.track.volume;
+			this.updatePlayerState();
+		};
+		this.track.onended = (e) => {
+			this.info.state = 'stop';
+			if ("mediaSession" in navigator){
+				navigator.mediaSession.playbackState = 'none';
+				navigator.mediaSession.setPositionState(null);
+			}
+		};
+		this.track.onerror = (e) => {
+			const errorMessages = {
+				MEDIA_ERR_ABORTED: 'Playback aborted by user',
+				MEDIA_ERR_NETWORK: 'Network error while loading',
+				MEDIA_ERR_DECODE: 'Audio decoding failed',
+				MEDIA_ERR_SRC_NOT_SUPPORTED: 'Audio format not supported'
+			};
+			
+			const error = e.target.error;
+			const errorMessage = errorMessages[error.code] || 'Unknown error';
+			console.error(`Audio playback error: ${errorMessage}`);
+			
+			// Dispatch error event for parent components
+			this.dispatchEvent(new CustomEvent('voicesPlayerError', {
+				detail: { code: error.code, message: errorMessage }
+			}));
+		};
+	}
 	audioElement(){
 		if(this.trackSrc){
 			this.track = new Audio(this.trackSrc);
@@ -563,91 +666,8 @@ class VoicesPlayer extends HTMLElement {
 				this.info.duration = this.track.duration;
 				this.info.overHour = Boolean(this.track.duration >= 3600);
 				this.uiElements();
-				this.setAttribute('data-loaded', true); // opacity 1
-				// media session
-				if ("mediaSession" in navigator) {
-					navigator.mediaSession.metadata = new MediaMetadata({
-						title: this.trackTitle,
-						artist: this.trackArtist,
-						album: this.trackAlbum,
-						artwork: [{
-							src: this.trackArtworkSrc
-						}]
-					});
-					navigator.mediaSession.setActionHandler('play', async () => {
-						await this.track.play();
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('pause', () => {
-						this.track.pause();
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('stop', () => {
-						this.track.pause();
-						this.track.currentTime = 0;
-						this.info.state = 'stop';
-						this.info.time = 0;
-						this.info.rate = 1;
-						this.info.volume = 1;
-						this.info.percent = 0;
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-						const skipTime = details.seekOffset || this.options.seekOffset;
-						this.track.currentTime = Math.max(this.track.currentTime - skipTime, 0);
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('seekforward', (details) => {
-						const skipTime = details.seekOffset || this.options.seekOffset;
-						this.track.currentTime = Math.min(this.track.currentTime + skipTime, this.track.duration);
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('seekto', (details) => {
-						this.track.currentTime = details.seekTime;
-						this.updateSessionState();
-					});
-					navigator.mediaSession.setActionHandler('nexttrack', null);
-					navigator.mediaSession.setActionHandler('previoustrack', null);
-				}
-				// player events
-				this.track.ontimeupdate = (e) =>{
-					this.info.time = e.target.currentTime;
-					this.info.percent = Math.min(100, Math.max(0, (parseFloat(this.info.time/this.info.duration) * 100)))+'%'; // 0-100%
-					this.updatePlayerState();
-				};
-				this.track.onplay = (e) => {
-					this.info.state = 'playing';
-					if ("mediaSession" in navigator){
-						navigator.mediaSession.playbackState = 'playing';
-					}
-				};
-				this.track.onpause = (e) => {
-					this.info.state = 'paused';
-					if ("mediaSession" in navigator){
-						navigator.mediaSession.playbackState = 'paused';
-					}
-				};
-				this.track.onratechange = (e) => {
-					this.info.rate = this.track.playbackRate;
-					this.updatePlayerState();
-					if ("mediaSession" in navigator) {
-						navigator.mediaSession.playbackRate = this.info.rate;
-					}
-				};
-				this.track.onvolumechange = (e) => {
-					this.info.volume = this.track.volume;
-					this.updatePlayerState();
-				};
-				this.track.onended = (e) => {
-					this.info.state = 'stop';
-					if ("mediaSession" in navigator){
-						navigator.mediaSession.playbackState = 'none';
-						navigator.mediaSession.setPositionState(null);
-					}
-				};
-				this.track.onerror = (e) => {
-					console.log(e);
-				};
+				this.sessionEventTracking(); // media session api mgmt.
+				this.audioEventTracking(); // audio player event/state mgmt.
 			});
 		}
 	}
