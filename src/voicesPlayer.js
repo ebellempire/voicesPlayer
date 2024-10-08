@@ -159,10 +159,14 @@ class VoicesPlayer extends HTMLElement {
 			}
 		}
 	}
-	playTrack(){
+	async playTrack(){
 		this.controls.ui_playpause.innerHTML = this.iconSvg('pause');
 		this.controls.ui_playpause.ariaLabel = this.labels.pause;
-		this.track.play();
+		try {
+			await this.track.play();
+		} catch(err) {
+			this.pauseTrack();
+		}
 	}
 	pauseTrack(){
 		this.controls.ui_playpause.innerHTML = this.iconSvg('play');
