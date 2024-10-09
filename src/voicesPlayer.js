@@ -313,7 +313,11 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_percent.id = 'player-percent';
 		this.uiSetProgressValue();
 		this.controls.ui_percent.addEventListener('mousedown',(e)=>{
-			if(this.info.state === 'playing') this.pauseTrack();
+			let resume = false;
+			if(this.info.state === 'playing') {
+				this.pauseTrack();
+				resume = true;
+			}
 			const mouseMove = (e) => {
 				this.uiSetDragging(true);
 				this.seekDrag(e);
@@ -326,7 +330,7 @@ class VoicesPlayer extends HTMLElement {
 					// console.log('it was a drag');
 					this.uiSetDragging(false);
 				}
-				this.playTrack();
+				if(resume) this.playTrack();
 				document.removeEventListener('mousemove', mouseMove);
 				document.removeEventListener('mouseup', mouseUp);
 			};
