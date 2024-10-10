@@ -59,11 +59,6 @@ class VoicesPlayer extends HTMLElement {
 		}
 		// the audio track
 		this.track = null;
-		// debounce 16ms/~60hz
-		this.debouncedUpdateState = this.debounce(() => {
-			this.updatePlayerState();
-			this.updateSessionState();
-		}, 16); 
 		// shadow dom
 		this.shadow = this.attachShadow({ mode: "open" });
 	}
@@ -91,6 +86,7 @@ class VoicesPlayer extends HTMLElement {
 	}
 	debounce(func, wait) {
 		let timeout;
+		wait = wait ? wait : 16; // 16ms/~60hz
 		return function executedFunction(...args) {
 			const later = () => {
 				clearTimeout(timeout);
@@ -190,6 +186,10 @@ class VoicesPlayer extends HTMLElement {
 			}
 		}
 	}
+	debouncedUpdates = this.debounce(() => {
+		this.updatePlayerState();
+		this.updateSessionState();
+	}, 16); 
 	uiSetDragging(isDragging){
 		if(isDragging){
 			this.info.isDragging = true;
@@ -265,9 +265,10 @@ class VoicesPlayer extends HTMLElement {
 		let pos = this.info.duration * (x / total);
 		this.track.currentTime = pos;
 		if(this.info.isDragging){
-			this.debouncedUpdateState();
+			this.debouncedUpdates();
 		}else{
 			this.updateSessionState();
+			this.updatePlayerState();
 		}
 	}
 	seekDrag(_event){

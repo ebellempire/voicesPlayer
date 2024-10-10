@@ -24,7 +24,7 @@ Some configurations may be passed as option attributes:
 ```
 <voices-player 
   ...
-  option-breakpoints="440,250,200,100"
+  option-breakpoints="440,300,250,200,100"
   option-base-height="40"
   option-seek-offset="30"
 ></voices-player>
