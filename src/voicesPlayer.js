@@ -490,6 +490,8 @@ class VoicesPlayer extends HTMLElement {
 			container-type: inline-size;
 			container-name: player;
 			user-select: none;
+			-ms-user-select: none;
+			-webkit-user-select: none;
 			display: block;
 			overflow: hidden;
 			font-size: var(--player-font-size);
@@ -511,6 +513,8 @@ class VoicesPlayer extends HTMLElement {
 		:host([data-waiting]){
 			cursor: progress;
 			user-select: none;
+			-ms-user-select: none;
+			-webkit-user-select: none;
 			pointer-events: none;
 		}
 		#player-inner{
@@ -535,6 +539,8 @@ class VoicesPlayer extends HTMLElement {
 		}
 		button{
 			user-select: none;
+			-ms-user-select: none;
+			-webkit-user-select: none;
 			transition: all .15s linear;
 			font-size: var(--player-font-size);
 			font-family: var(--player-font-family);
@@ -569,6 +575,8 @@ class VoicesPlayer extends HTMLElement {
 		#player-time,
 		#player-duration{
 			user-select: none;
+			-ms-user-select: none;
+			-webkit-user-select: none;
 			transition: all .15s linear;
 			background: var(--player-timestamp-background);
 			color: var(--player-timestamp-color);
@@ -605,6 +613,8 @@ class VoicesPlayer extends HTMLElement {
 			display: none;
 		}
 		#player-rate{
+			padding: 0;
+			text-align: center;
 			transition: all .15s linear;
 			border-radius: 50%;
 			border: 1px solid var(--player-progress-background);
