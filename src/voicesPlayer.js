@@ -15,6 +15,7 @@ class VoicesPlayer extends HTMLElement {
 			baseHeight: 40, // 40-80 px (not incl. padding)
 			breakpoints: {
 				noArtwork: 440, // px (@container width, hide artwork)
+				noRate: 300, // px (@container width, hide playback rate ui)
 				noDuration: 250, // px (@container width, hide duration time)
 				noPercent: 200, // px (@container width, hide seek ui)
 				noSkip: 100, // px (@container width, hide skip ahead/back buttons)
@@ -223,7 +224,13 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_duration.textContent = this.hhmmss(this.info.duration);
 	}
 	uiSetRateValue(){
-		this.controls.ui_rate.textContent = this.info.rate; 
+		this.controls.ui_rate.textContent = this.info.rate + 'x'; 
+		this.controls.ui_rate.setAttribute('aria-label', 'Playback speed: '+this.info.rate + 'x');
+		if(this.info.rate !== 1){
+			this.controls.ui_rate.classList.add('highlight');
+		}else{
+			this.controls.ui_rate.classList.remove('highlight');
+		}
 	}
 	uiSetVolumeValue(){
 		this.controls.ui_volume.textContent = this.info.volume; 
@@ -384,11 +391,28 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_percent.appendChild(this.controls.ui_duration);
 	}
 	uiRate(){
-		this.controls.ui_rate = document.createElement("span");
+		this.controls.ui_rate = document.createElement("button");
 		this.controls.ui_rate.id = 'player-rate';
+		this.controls.ui_rate.setAttribute('tabindex', '0');
 		this.uiSetRateValue();
 		this.controls.ui_rate.addEventListener('click',(e)=>{
-			console.log('@todo: rate controls', e)
+			switch(this.track.playbackRate){
+				case 0.5:
+					this.track.playbackRate = 1;
+					break;
+				case 1:
+					this.track.playbackRate = 1.5;
+					break;
+				case 1.5:
+					this.track.playbackRate = 2.0;
+					break;
+				case 2:
+					this.track.playbackRate = 0.5;
+					break;
+				default:
+					this.track.playbackRate = 1.0;
+			}
+			this.uiSetRateValue();
 		});
 		this.controls.ui_container.appendChild(this.controls.ui_rate);
 	}
@@ -454,6 +478,9 @@ class VoicesPlayer extends HTMLElement {
 			--player-button-text: #f2f2f2;
 			--player-button-text-hover: #a2a2a2;
 			--player-button-border-radius: 0;
+			--player-button-highlight-text: #333;
+			--player-button-highlight-background: #f2f2f2;
+			--player-button-highlight-border-color: #a2a2a2;
 			--player-progress-background: #444;
 			--player-progress-color: #a2a2a2;
 			--player-timestamp-color: var(--player-text-color);
@@ -508,9 +535,10 @@ class VoicesPlayer extends HTMLElement {
 		button{
 			user-select: none;
 			transition: all .15s linear;
+			font-size: var(--player-font-size);
+			font-family: var(--player-font-family);
 			height: var(--player-button-size);
 			width: var(--player-button-size);
-			transition: all .15s linear;
 			color: var(--player-button-text);
 			background: var(--player-button-background);
 			border-radius: var(--player-button-border-radius);
@@ -555,7 +583,7 @@ class VoicesPlayer extends HTMLElement {
 			--data-percent: 0%;
 			transform: translateZ(0);
 			will-change: background-image;
-			margin-left: var(--player-padding);
+			margin: 0 calc(var(--player-padding) * 2 );
 			height: var(--player-base-height);
 			border-radius: clamp( 
 				calc( var(--player-border-radius) / 2 ),
@@ -571,15 +599,38 @@ class VoicesPlayer extends HTMLElement {
 			background-image: linear-gradient(to right, var(--player-progress-color) 0 var(--data-percent), transparent var(--data-percent) 100%);
 			cursor: grab;
 		}
-		#player-volume,
-		#player-rate{
+		#player-volume{
 			/* @todo */
 			display: none;
+		}
+		#player-rate{
+			transition: all .15s linear;
+			border-radius: 50%;
+			border: 1px solid var(--player-progress-background);
+			height: calc(var(--player-base-height) - var(--player-padding));
+			width: calc(var(--player-base-height) - var(--player-padding));
+			margin-right: var(--player-padding);
+		}
+		#player-rate:hover{
+			border-color: var(--player-button-text-hover);
+		}
+		#player-rate.highlight{
+			color: var(--player-button-highlight-text);
+			background: var(--player-button-highlight-background);
+			border-color: var(--player-button-highlight-border-color);
 		}
 		@container player (max-width: ${this.options.breakpoints.noArtwork}px){
 			#player-artwork{
 				opacity: 0;
 				width: 0;
+			}
+		}
+		@container player (max-width: ${this.options.breakpoints.noRate}px){
+			#player-rate{
+				display:none;
+			}
+			#player-percent{
+				margin-right: var(--player-padding);
 			}
 		}
 		@container player (max-width: ${this.options.breakpoints.noDuration}px){
@@ -631,7 +682,7 @@ class VoicesPlayer extends HTMLElement {
 				this.track.currentTime = 0;
 				this.info.state = 'stop';
 				this.info.time = 0;
-				this.info.rate = 1;
+				this.info.rate = 1.0;
 				this.info.volume = 1;
 				this.info.percent = 0;
 				this.updateSessionState();
