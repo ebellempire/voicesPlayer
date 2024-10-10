@@ -36,6 +36,7 @@ class VoicesPlayer extends HTMLElement {
 			duration: 0,
 			overHour: false,
 			isDragging: false,
+			isWaiting: false,
 		}
 		this.controls = {
 			ui_container: null,
@@ -78,6 +79,7 @@ class VoicesPlayer extends HTMLElement {
 			this.track = null;
 		}
 		this.removeEventListener('voicesPlayerSeconds');
+		this.controls.ui_container.removeEventListener('keydown');
 		this.controls.ui_percent.removeEventListener('mousedown');
 		this.controls.ui_percent.removeEventListener('keydown');
 		this.controls.ui_playpause.removeEventListener('click');
@@ -195,6 +197,21 @@ class VoicesPlayer extends HTMLElement {
 		}
 		this.info.isDragging = false;
 		this.controls.ui_percent.style.setProperty('cursor', 'grab'); 
+	}
+	uiSetWaiting(){
+		const disablePlayerButtonKeydown = (e) => {
+			if (e.key == 'Enter') {
+				e.returnValue = false;
+				return false;
+			}
+		};
+		if(this.info.isWaiting){
+			this.setAttribute('data-waiting','true');
+			this.controls.ui_container.addEventListener('keydown', disablePlayerButtonKeydown);
+		}else{
+			this.removeAttribute('data-waiting');
+			this.controls.ui_container.removeEventListener('keydown', disablePlayerButtonKeydown);
+		}
 	}
 	uiSetProgressValue(){
 		this.controls.ui_percent.style.setProperty('--data-percent', this.info.percent); 
@@ -463,6 +480,11 @@ class VoicesPlayer extends HTMLElement {
 		:host([data-loaded]){
 			opacity: 1;
 		}
+		:host([data-waiting]){
+			cursor: progress;
+			user-select: none;
+			pointer-events: none;
+		}
 		#player-inner{
 			display: flex;
 			flex-direction: row;
@@ -667,6 +689,16 @@ class VoicesPlayer extends HTMLElement {
 			this.info.volume = this.track.volume;
 			this.updatePlayerState();
 		};
+		this.track.oncanplay = (e) => {
+			if(this.info.isWaiting){
+				this.info.isWaiting = false;
+				this.uiSetWaiting();
+			}
+		}
+		this.track.onwaiting = (e) => {
+			this.info.isWaiting = true;
+			this.uiSetWaiting();
+		}
 		this.track.onended = (e) => {
 			this.info.state = 'stop';
 			if ("mediaSession" in navigator){
