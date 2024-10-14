@@ -486,6 +486,7 @@ class VoicesPlayer extends HTMLElement {
 			user-select: none;
 			-ms-user-select: none;
 			-webkit-user-select: none;
+			touch-action: manipulation;
 			display: block;
 			overflow: hidden;
 			font-size: var(--player-font-size);
@@ -512,6 +513,7 @@ class VoicesPlayer extends HTMLElement {
 			pointer-events: none;
 		}
 		#player-inner{
+			touch-action: manipulation;
 			display: flex;
 			flex-direction: row;
 			align-items: center;
