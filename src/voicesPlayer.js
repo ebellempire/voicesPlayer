@@ -398,20 +398,14 @@ class VoicesPlayer extends HTMLElement {
 		this.uiSetRateValue();
 		this.controls.ui_rate.addEventListener('click',(e)=>{
 			switch(this.track.playbackRate){
-				case 0.5:
-					this.track.playbackRate = 1;
-					break;
 				case 1:
 					this.track.playbackRate = 1.5;
 					break;
 				case 1.5:
-					this.track.playbackRate = 2.0;
-					break;
-				case 2:
-					this.track.playbackRate = 0.5;
+					this.track.playbackRate = 2;
 					break;
 				default:
-					this.track.playbackRate = 1.0;
+					this.track.playbackRate = 1;
 			}
 			this.uiSetRateValue();
 		});
