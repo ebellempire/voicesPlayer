@@ -200,18 +200,10 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_percent.style.setProperty('cursor', 'grab'); 
 	}
 	uiSetWaiting(){
-		const disablePlayerButtonKeydown = (e) => {
-			if (e.key == 'Enter') {
-				e.returnValue = false;
-				return false;
-			}
-		};
 		if(this.info.isWaiting){
 			this.setAttribute('data-waiting','true');
-			this.controls.ui_container.addEventListener('keydown', disablePlayerButtonKeydown);
 		}else{
 			this.removeAttribute('data-waiting');
-			this.controls.ui_container.removeEventListener('keydown', disablePlayerButtonKeydown);
 		}
 	}
 	uiSetProgressValue(){
@@ -507,9 +499,6 @@ class VoicesPlayer extends HTMLElement {
 		}
 		:host([data-waiting]){
 			cursor: progress;
-			user-select: none;
-			-ms-user-select: none;
-			-webkit-user-select: none;
 			pointer-events: none;
 		}
 		#player-inner{
