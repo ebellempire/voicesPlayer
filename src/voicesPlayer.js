@@ -59,30 +59,28 @@ class VoicesPlayer extends HTMLElement {
 		}
 		// the audio track
 		this.track = null;
+		// abort controller for event listener cleanup
+		this.abortController = null;
 		// shadow dom
 		this.shadow = this.attachShadow({ mode: "open" });
 	}
 	connectedCallback(){
+		this.abortController = new AbortController();
 		this.getAttributes();
 		this.styleSheet();
 		this.audioElement();
 	}
 	disconnectedCallback(){
+		if (this.abortController) {
+			this.abortController.abort();
+			this.abortController = null;
+		}
 		if (this.track) {
 			this.track.pause();
 			this.track.src = '';
 			this.track.load();
 			this.track = null;
 		}
-		this.removeEventListener('voicesPlayerSeconds');
-		this.controls.ui_container.removeEventListener('keydown');
-		this.controls.ui_percent.removeEventListener('mousedown');
-		this.controls.ui_percent.removeEventListener('keydown');
-		this.controls.ui_playpause.removeEventListener('click');
-		this.controls.ui_skipbackward.removeEventListener('click');
-		this.controls.ui_skipforward.removeEventListener('click');
-		this.controls.ui_rate.removeEventListener('click');
-		this.controls.ui_volume.removeEventListener('click');
 	}
 	debounce(func, wait) {
 		let timeout;
@@ -295,7 +293,7 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_skipbackward.innerHTML = this.iconSvg('skip');
 		this.controls.ui_skipbackward.addEventListener('click',()=>{
 			this.skipBack();
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_skipbackward);
 	}
 	uiPlayPause(){
@@ -311,7 +309,7 @@ class VoicesPlayer extends HTMLElement {
 			if(this.info.state === 'playing'){
 				this.pauseTrack();
 			}
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_playpause);
 	}
 	uiSkipForward(){
@@ -322,7 +320,7 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_skipforward.innerHTML = this.iconSvg('skip');
 		this.controls.ui_skipforward.addEventListener('click',()=>{
 			this.skipForward();
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_skipforward);
 	}
 	uiSeekProgress(){
@@ -353,7 +351,7 @@ class VoicesPlayer extends HTMLElement {
 			};
 			document.addEventListener('mousemove', mouseMove);
 			document.addEventListener('mouseup', mouseUp);
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_percent.setAttribute('role', 'slider');
 		this.controls.ui_percent.setAttribute('aria-label', 'Seek slider');
 		this.controls.ui_percent.setAttribute('tabindex', '0');
@@ -366,7 +364,7 @@ class VoicesPlayer extends HTMLElement {
 					this.skipBack();
 					break;
 			}
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_percent);
 		this.uiTime();
 		this.uiDuration()
@@ -400,7 +398,7 @@ class VoicesPlayer extends HTMLElement {
 					this.track.playbackRate = 1;
 			}
 			this.uiSetRateValue();
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_rate);
 	}
 	uiVolume(){
@@ -409,7 +407,7 @@ class VoicesPlayer extends HTMLElement {
 		this.uiSetVolumeValue();
 		this.controls.ui_volume.addEventListener('click',(e)=>{
 			console.log('@todo: volume controls', e)
-		});
+		}, { signal: this.abortController.signal });
 		this.controls.ui_container.appendChild(this.controls.ui_volume);
 	}
 	uiElements(){
@@ -706,7 +704,7 @@ class VoicesPlayer extends HTMLElement {
 		this.addEventListener('voicesPlayerSeconds', (e)=>{
 			if( Number.isInteger( parseInt(e.detail) ) )
 				this.skipTo( parseInt(e.detail) );
-		});
+		}, { signal: this.abortController.signal });
 		// internal
 		this.track.ontimeupdate = (e) =>{
 			this.info.time = e.target.currentTime;
