@@ -240,6 +240,7 @@ class VoicesPlayer extends HTMLElement {
 		this.track.pause();
 	}
 	skipTo(_seconds){
+		if(!this.info.duration) return;
 		this.info.percent = (_seconds / this.info.duration * 100)+'%';
 		this.info.time = _seconds;
 		this.track.currentTime = _seconds;
@@ -250,6 +251,7 @@ class VoicesPlayer extends HTMLElement {
 	seekTo(_event){
 		let rect = this.controls.ui_percent.getBoundingClientRect();
 		let total = rect.width;
+		if(!total || !this.info.duration) return;
 		let x = Math.max(0, Math.min(_event.clientX - rect.left, total));
 		this.info.percent = (x / total * 100)+'%';
 		let pos = this.info.duration * (x / total);
@@ -305,8 +307,7 @@ class VoicesPlayer extends HTMLElement {
 		this.controls.ui_playpause.addEventListener('click',()=>{
 			if(this.info.state !== 'playing'){
 				this.playTrack();
-			}
-			if(this.info.state === 'playing'){
+			}else{
 				this.pauseTrack();
 			}
 		}, { signal: this.abortController.signal });
@@ -708,7 +709,7 @@ class VoicesPlayer extends HTMLElement {
 		// internal
 		this.track.ontimeupdate = (e) =>{
 			this.info.time = e.target.currentTime;
-			this.info.percent = Math.min(100, Math.max(0, (this.info.time / this.info.duration) * 100))+'%'; // 0-100%
+			this.info.percent = this.info.duration ? Math.min(100, Math.max(0, (this.info.time / this.info.duration) * 100))+'%' : '0%';
 			this.updatePlayerState();
 		};
 		this.track.onplay = (e) => {
