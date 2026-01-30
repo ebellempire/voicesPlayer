@@ -159,7 +159,7 @@ class VoicesPlayer extends HTMLElement {
 		});
 	}
 	hhmmss(_time_s){
-		let seconds = Math.floor(_time_s);
+		let seconds = Math.round(_time_s);
 		let minutes = Math.floor(seconds / 60);
 		let hours = Math.floor(minutes / 60);
 		seconds = seconds % 60;
@@ -244,7 +244,7 @@ class VoicesPlayer extends HTMLElement {
 	skipTo(_seconds){
 		this.info.percent = (_seconds / this.info.duration * 100)+'%';
 		this.info.time = _seconds;
-		this.track.currentTime = this.info.duration * (_seconds / this.info.duration);
+		this.track.currentTime = _seconds;
 		if(this.info.state !== 'playing'){
 			this.playTrack();
 		}
@@ -710,7 +710,7 @@ class VoicesPlayer extends HTMLElement {
 		// internal
 		this.track.ontimeupdate = (e) =>{
 			this.info.time = e.target.currentTime;
-			this.info.percent = Math.min(100, Math.max(0, (parseFloat(this.info.time/this.info.duration) * 100)))+'%'; // 0-100%
+			this.info.percent = Math.min(100, Math.max(0, (this.info.time / this.info.duration) * 100))+'%'; // 0-100%
 			this.updatePlayerState();
 		};
 		this.track.onplay = (e) => {
