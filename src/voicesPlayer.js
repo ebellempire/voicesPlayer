@@ -773,7 +773,7 @@ class VoicesPlayer extends HTMLElement {
 	}
 	audioElement(){
 		if(this.trackSrc){
-			this.track = new Audio(this.trackSrc);
+			this.track = new Audio();
 			this.track.addEventListener("loadedmetadata", () => {
 				this.info.duration = this.track.duration;
 				this.info.overHour = Boolean(this.track.duration >= 3600);
@@ -781,6 +781,13 @@ class VoicesPlayer extends HTMLElement {
 				this.sessionEventTracking(); // media session api mgmt.
 				this.audioEventTracking(); // audio player event/state mgmt.
 			});
+			this.track.addEventListener("error", (e) => {
+				console.error("Error event:", e);
+				console.error("Error code:", this.track.error);
+				console.error("File src:", this.track.src);
+			});
+			this.track.src = this.trackSrc;
+			this.track.load();
 		}
 	}
 }
